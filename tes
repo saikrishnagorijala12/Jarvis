@@ -1,0 +1,26 @@
+import os
+import datetime
+import speech_recognition as sr
+import pyttsx3
+import spacy
+import subprocess
+import wikipedia
+from googlesearch import search
+import webbrowser
+import requests
+from bs4 import BeautifulSoup
+import pyjokes
+import inflect
+import platform
+import fnmatch
+import random
+
+
+
+
+
+
+
+
+
+
