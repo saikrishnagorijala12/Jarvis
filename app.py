@@ -1,4 +1,3 @@
-import os
 import datetime
 import speech_recognition as sr
 import pyttsx3
@@ -15,6 +14,13 @@ import threading
 import time
 from TTS.api import TTS
 import simpleaudio as sa
+import logging
+import os
+import sys
+import contextlib
+import io
+
+
 
 # ------------------ Initialize ------------------
 nlp = spacy.load("en_core_web_sm")
@@ -28,6 +34,18 @@ thinking_flag = False
 tts_model = TTS(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=False, gpu=False)
 
 
+@contextlib.contextmanager
+def suppress_stdout_stderr():
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        yield
+
+# ------------------ Logging off ------------------
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logs (if used internally)
+logging.getLogger('TTS').setLevel(logging.FATAL)
+logging.getLogger('numba').setLevel(logging.WARNING)
+logging.getLogger('torch').setLevel(logging.ERROR)
+
+# ------------------ Model SetUp ------------------
 # login(token="")
 # Load LLaMA 3.1 once at startup
 # model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"  # change to your model path if local
@@ -48,7 +66,7 @@ def ask_llama(prompt, max_new_tokens=300):
 
     try:
         response = ollama.chat(
-            model="llama3.1",   # local Ollama model
+            model="friiday",   # local Ollama model
             messages=[
                 {
                     "role": "system",
@@ -93,7 +111,8 @@ def show_thinking():
 def speak(text):
     print(f"Friday: {text}")
     file_path = "voice.wav"
-    tts_model.tts_to_file(text=text, file_path=file_path)
+    with suppress_stdout_stderr():
+        tts_model.tts_to_file(text=text, file_path=file_path)
 
     # Play audio
     wave_obj = sa.WaveObject.from_wave_file(file_path)
